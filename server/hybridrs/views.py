@@ -142,10 +142,15 @@ def like_movie(request):
         return Response({'error': 'user_id and movie_id are required'}, status=400)
 
     # Add new entry
-    new_entry = {'userId': int(user_id), 'movieId': int(movie_id), 'rating': 5}
     global ratings
-    new_entry_df = pd.DataFrame([new_entry])  # Create a DataFrame for the new entry
-    ratings = pd.concat([ratings, new_entry_df], ignore_index=True)
+    
+    if ((ratings['userId'] == user_id) & (ratings['movieId'] == movie_id)).any():
+        ratings.loc[(ratings['userId'] == user_id) & (ratings['movieId'] == movie_id), 'rating'] = 5
+    else:
+        new_entry = {'userId': int(user_id), 'movieId': int(movie_id), 'rating': 5}
+        
+        new_entry_df = pd.DataFrame([new_entry])  # Create a DataFrame for the new entry
+        ratings = pd.concat([ratings, new_entry_df], ignore_index=True)
 
     # Save to CSV
     ratings.to_csv("hybridrs/dataset/ratings.csv", index=False)
