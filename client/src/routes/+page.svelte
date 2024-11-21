@@ -5,15 +5,27 @@
 	import { browser } from '$app/environment';
 	import Cookies from 'js-cookie';
 	import MovieCard from '../components/MovieCard.svelte';
+
+	interface Movie {
+		movieId: number;
+		title: string;
+		recommended_from: string;
+	}
+
 	let email = '';
+	let movies: Array<Movie> = [];
 	onMount(() => {
 		console.log(Cookies.get('token'));
 
-		if (browser)
-			ApiClient.get('/auth/user/').then((res) => {
-				console.log(res.data);
-				if (res.data.email) email = res.data.email;
-			});
+		ApiClient.get('/auth/user/').then((res) => {
+			console.log(res.data);
+			if (res.data.email) email = res.data.email;
+		});
+
+		ApiClient.get('/movies/').then((res) => {
+			console.log(res.data);
+			movies = res.data.recommended_movies
+		});	
 	});
 </script>
 
@@ -124,8 +136,8 @@
 					class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8"
 				>
 					<!-- add movieCard component 10 times using loop -->
-					{#each Array(10) as _}
-						<MovieCard />
+					{#each movies as movie}
+						<MovieCard movie={movie} />
 					{/each}
 
 					<!-- More products... -->

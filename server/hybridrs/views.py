@@ -63,7 +63,7 @@ def content_based_recommendation(user_id, cosine_sim_df, ratings):
     return top_n_movies
 
 
-def collaborative_recommendations(user_id, item_final_ratings):
+def collaborative_recommendationsfn(user_id, item_final_ratings):
     movie_recc = item_final_ratings.loc[user_id].sort_values(ascending=False)
     movie_recc = movie_recc.index.tolist()
     return movie_recc
@@ -71,9 +71,11 @@ def collaborative_recommendations(user_id, item_final_ratings):
 
 def hybrid_recommendations(user_id, top_n=25):
     content_recommendations = content_based_recommendation(user_id, cosine_sim_df, ratings)
-    collaborative_recommendations = collaborative_recommendations(user_id, item_final_ratings)
+    collaborative_recommendations = collaborative_recommendationsfn(user_id, item_final_ratings)
     combined_recommendations = []
     content_set, collab_set = set(content_recommendations), set(collaborative_recommendations)
+    
+    # print('collab',collaborative_recommendations)
 
     # Add movies present in both lists first
     both_recommendations = list(content_set.intersection(collab_set))
@@ -109,8 +111,8 @@ def hybrid_recommendations(user_id, top_n=25):
 @api_view(['GET'])
 def get_movies(request):
     user = request.user
-    preferences = user.preferences.split('.') if hasattr(user, 'preferences') else request.GET.get('preferences')
-
+    preferences = user.prefrences.split('.') 
+    
     n = 25  # Number of recommendations to return, default to 25
 
     if not preferences:
@@ -135,9 +137,10 @@ def get_movies(request):
 
 @api_view(['GET'])
 def like_movie(request):
-    user_id = request.GET.get('user_id')
+    user_id = request.user.id
     movie_id = request.GET.get('movie_id')
-
+    
+    print(user_id, movie_id)
     if not user_id or not movie_id:
         return Response({'error': 'user_id and movie_id are required'}, status=400)
 
@@ -163,7 +166,7 @@ def like_movie(request):
 
 @api_view(['GET'])
 def dislike_movie(request):
-    user_id = request.GET.get('user_id')
+    user_id = request.user.id
     movie_id = request.GET.get('movie_id')
 
     if not user_id or not movie_id:

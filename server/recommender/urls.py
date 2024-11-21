@@ -21,7 +21,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from userprofile.views import register, get_user
-
+from hybridrs.views import get_movies, like_movie, dislike_movie
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,5 +29,8 @@ urlpatterns = [
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/register/', register),
     path('api/auth/user/', get_user),
-    path('', include('hybridrs.urls')),  
+    # path('api/', include('hybridrs.urls')),  
+    path('api/movies/', get_movies, name='get_movies'),
+    path('api/movies/like/', like_movie, name='like_movie'),
+    path('api/movies/unlike/', dislike_movie, name='dislike_movie'),
 ]
