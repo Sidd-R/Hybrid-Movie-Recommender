@@ -121,7 +121,7 @@ def get_movies(request):
 
     if not preferences:
         return Response({'error': 'No preferences provided'}, status=400)
-
+    print(user.id)
     print(user.id in ratings['userId'].values)
     if user.id not in ratings['userId'].values:  # Check if the user has ratings
         recommended_ids = new_user(user.id, preferences, movies, n)

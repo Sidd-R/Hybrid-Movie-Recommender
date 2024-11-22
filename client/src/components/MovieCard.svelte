@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ApiClient } from "../models";
 	let heart = false;
 	let thumbnail: string = ''; // Thumbnail URL placeholder.
 
@@ -49,10 +50,15 @@
 	// Fetch the thumbnail on component load
 	fetchThumbnail();
 
-	// Toggle the like button state
 	const handleLikeToggle = () => {
-		heart = !heart;
-	};
+		if (!heart) {
+			ApiClient.get('/movies/like/?movie_id='+movie.movieId);
+			heart = true;
+		} else {
+			heart = false;
+			ApiClient.get('/movies/unlike/?movie_id='+movie.movieId);
+		}
+	}
 </script>
 
 <div class="group relative">
