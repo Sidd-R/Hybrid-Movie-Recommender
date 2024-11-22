@@ -83,13 +83,13 @@ def hybrid_recommendations(user_id, top_n=25):
     both_recommendations = list(content_set.intersection(collab_set))
     both_recommendations = set(both_recommendations)
     
-    for rec in collaborative_recommendations:
-        if rec in both_recommendations:
-            combined_recommendations.append({'movieId': rec, 'recommended_from': 'collaborative'})
-    
     for rec in content_recommendations:
-        if rec in both_recommendations and rec not in collab_set:
+        if rec in both_recommendations:
             combined_recommendations.append({'movieId': rec, 'recommended_from': 'content'})
+            
+    for rec in collaborative_recommendations:
+        if rec in both_recommendations and rec not in content_set and rec not in combined_recommendations:
+            combined_recommendations.append({'movieId': rec, 'recommended_from': 'collaborative'})
             
     
             
