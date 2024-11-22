@@ -58,6 +58,8 @@ def content_based_recommendation(user_id, cosine_sim_df, ratings):
         movie_row = cosine_sim_df.loc[movie_id, :].sort_values(ascending=False)
         top_5_similar = movie_row[1:6].index.tolist()
         top_n_movies.extend(top_5_similar)
+        if len(top_n_movies) > 50:
+            break
 
     top_n_movies = [movie for movie in top_n_movies if movie not in set(user_ratings) ]
     return top_n_movies
@@ -66,7 +68,7 @@ def content_based_recommendation(user_id, cosine_sim_df, ratings):
 def collaborative_recommendationsfn(user_id, item_final_ratings):
     movie_recc = item_final_ratings.loc[user_id].sort_values(ascending=False)
     movie_recc = movie_recc.index.tolist()
-    return movie_recc
+    return movie_recc[:50]
 
 
 def hybrid_recommendations(user_id, top_n=25):
@@ -81,13 +83,15 @@ def hybrid_recommendations(user_id, top_n=25):
     both_recommendations = list(content_set.intersection(collab_set))
     both_recommendations = set(both_recommendations)
     
-    for rec in content_recommendations:
+    for rec in collaborative_recommendations:
         if rec in both_recommendations:
+            combined_recommendations.append({'movieId': rec, 'recommended_from': 'collaborative'})
+    
+    for rec in content_recommendations:
+        if rec in both_recommendations and rec not in collab_set:
             combined_recommendations.append({'movieId': rec, 'recommended_from': 'content'})
             
-    for rec in collaborative_recommendations:
-        if rec in both_recommendations and rec not in content_set:
-            combined_recommendations.append({'movieId': rec, 'recommended_from': 'collaborative'})
+    
             
     # Remove duplicates from both lists
     content_recommendations = [rec for rec in content_recommendations if rec not in both_recommendations]
@@ -118,6 +122,7 @@ def get_movies(request):
     if not preferences:
         return Response({'error': 'No preferences provided'}, status=400)
 
+    print(user.id in ratings['userId'].values)
     if user.id not in ratings['userId'].values:  # Check if the user has ratings
         recommended_ids = new_user(user.id, preferences, movies, n)
         recommended_movies = movies[movies['movieId'].isin(recommended_ids)][['movieId', 'title']].to_dict(orient='records')
